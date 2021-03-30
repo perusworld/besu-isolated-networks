@@ -1,0 +1,340 @@
+---
+version: '3.6'
+
+x-haproxy-def:
+  &haproxy-def
+  restart: "on-failure"
+  image: haproxy:${HAPROXY_VERSION:-latest}
+
+x-besu-bootnode-def:
+  &besu-bootnode-def
+  restart: "on-failure"
+  image: hyperledger/besu:${BESU_VERSION:-latest}
+  environment:
+    - LOG4J_CONFIGURATION_FILE=/config/log-config.xml
+  entrypoint:
+    - /bin/bash
+    - -c
+    - |
+      /opt/besu/bin/besu public-key export --to=/tmp/bootnode_pubkey;
+      /opt/besu/bin/besu \
+      --config-file=/config/config.toml \
+      --genesis-file=/config/genesis.json \
+      --node-private-key-file=/opt/besu/keys/key \
+      --min-gas-price=0 \
+      --rpc-http-api=EEA,WEB3,ETH,NET,PRIV,PERM,${BESU_CONS_API:-IBFT} \
+      --rpc-ws-api=EEA,WEB3,ETH,NET,PRIV,PERM,${BESU_CONS_API:-IBFT} ;
+
+x-besu-def:
+  &besu-def
+  restart: "on-failure"
+  image: hyperledger/besu:${BESU_VERSION:-latest}
+  environment:
+    - LOG4J_CONFIGURATION_FILE=/config/log-config.xml
+  entrypoint:
+    - /bin/bash
+    - -c
+    - |
+      while [ ! -f "/opt/besu/public-keys/bootnode_pubkey" ]; do sleep 5; done ;
+      /opt/besu/bin/besu \
+      --config-file=/config/config.toml \
+      --genesis-file=/config/genesis.json \
+      --node-private-key-file=/opt/besu/keys/key \
+      --min-gas-price=0 \
+      --rpc-http-api=EEA,WEB3,ETH,NET,PRIV,PERM,${BESU_CONS_API:-IBFT} \
+      --rpc-ws-api=EEA,WEB3,ETH,NET,PRIV,PERM,${BESU_CONS_API:-IBFT} ;
+
+x-orion-def:
+  &orion-def
+  image: consensys/quorum-orion:${QUORUM_ORION_VERSION:-latest}
+  command: ["/config/orion.conf"]
+
+services:
+
+  orion-dns-proxy:
+    << : *haproxy-def
+    volumes:
+      - ./config/haproxy/haproxy-orion.cfg:/usr/local/etc/haproxy/haproxy.cfg
+    ports:
+      - 12036:12036
+    networks:
+      internet_network:
+      orion_network:
+
+  partnera-firewall:
+    << : *haproxy-def
+    volumes:
+      - ./config/haproxy/haproxy-partnera.cfg:/usr/local/etc/haproxy/haproxy.cfg
+    ports:
+      - 12037:12037
+      - 20000:20000
+    networks:
+      internet_network:
+      partnera_blockchain_network:
+
+  partnerb-firewall:
+    << : *haproxy-def
+    volumes:
+      - ./config/haproxy/haproxy-partnerb.cfg:/usr/local/etc/haproxy/haproxy.cfg
+    ports:
+      - 12038:12038
+      - 20002:20000
+    networks:
+      internet_network:
+      partnerb_blockchain_network:
+
+  partnerc-firewall:
+    << : *haproxy-def
+    volumes:
+      - ./config/haproxy/haproxy-partnerc.cfg:/usr/local/etc/haproxy/haproxy.cfg
+    ports:
+      - 12039:12039
+      - 20004:20000
+    networks:
+      internet_network:
+      partnerc_blockchain_network:
+
+  validator1:
+    << : *besu-bootnode-def
+    volumes:
+      - public-keys:/tmp/
+      - ./config/besu/config.toml:/config/config.toml
+      - ./config/besu/log-config.xml:/config/log-config.xml
+      - ./logs/besu:/var/log/
+      - ./config/besu/${BESU_CONS_ALGO:-ibft2}Genesis.json:/config/genesis.json
+      - ./config/besu/networkFiles/validator1/keys:/opt/besu/keys
+      - ./config/besu/static-nodes-partnera.json:/config/static-nodes.json
+    networks:
+      partnera_blockchain_network:
+
+  validator2:
+    << : *besu-def
+    volumes:
+      - public-keys:/opt/besu/public-keys/
+      - ./config/besu/config.toml:/config/config.toml
+      - ./config/besu/log-config.xml:/config/log-config.xml
+      - ./logs/besu:/var/log/
+      - ./config/besu/${BESU_CONS_ALGO:-ibft2}Genesis.json:/config/genesis.json
+      - ./config/besu/networkFiles/validator2/keys:/opt/besu/keys
+      - ./config/besu/static-nodes-partnera.json:/config/static-nodes.json
+    depends_on:
+      - validator1
+    networks:
+      partnera_blockchain_network:
+
+  validator3:
+    << : *besu-def
+    volumes:
+      - public-keys:/opt/besu/public-keys/
+      - ./config/besu/config.toml:/config/config.toml
+      - ./config/besu/log-config.xml:/config/log-config.xml
+      - ./logs/besu:/var/log/
+      - ./config/besu/${BESU_CONS_ALGO:-ibft2}Genesis.json:/config/genesis.json
+      - ./config/besu/networkFiles/validator3/keys:/opt/besu/keys
+      - ./config/besu/static-nodes-partnerb.json:/config/static-nodes.json
+    depends_on:
+      - validator1
+    networks:
+      partnerb_blockchain_network:
+
+  validator4:
+    << : *besu-def
+    volumes:
+      - public-keys:/opt/besu/public-keys/
+      - ./config/besu/config.toml:/config/config.toml
+      - ./config/besu/log-config.xml:/config/log-config.xml
+      - ./logs/besu:/var/log/
+      - ./config/besu/${BESU_CONS_ALGO:-ibft2}Genesis.json:/config/genesis.json
+      - ./config/besu/networkFiles/validator4/keys:/opt/besu/keys
+      - ./config/besu/static-nodes-partnerc.json:/config/static-nodes.json
+    depends_on:
+      - validator1
+    networks:
+      partnerc_blockchain_network:
+
+  rpcnode:
+    << : *besu-def
+    volumes:
+      - public-keys:/opt/besu/public-keys/
+      - ./config/besu/config.toml:/config/config.toml
+      - ./config/besu/log-config.xml:/config/log-config.xml
+      - ./logs/besu:/var/log/
+      - ./config/besu/${BESU_CONS_ALGO:-ibft2}Genesis.json:/config/genesis.json
+      - ./config/besu/networkFiles/rpcnode/keys:/opt/besu/keys
+      - ./config/besu/static-nodes-partnera.json:/config/static-nodes.json
+    depends_on:
+      - validator1
+    ports:
+      - 8545:8545/tcp
+      - 8546:8546/tcp
+    networks:
+      partnera_blockchain_network:
+
+  explorer:
+    build: block-explorer-light/.
+    image: partnera_blockchain_network/block-explorer-light:develop
+    depends_on:
+      - rpcnode
+    ports:
+      - 25000:80/tcp
+    networks:
+      partnera_blockchain_network:
+
+  member1orion:
+    << : *orion-def
+    environment:
+      - ORION_OTHERNODES=http://orion-dns-proxy:8082/,http://orion-dns-proxy:8083/
+      - ORION_NODEURL=http://orion-dns-proxy:8081
+      - LOG4J_CONFIGURATION_FILE=/config/log-config.xml
+    volumes:
+      - ./config/orion/orion.conf:/config/orion.conf
+      - ./config/orion/networkFiles/orion1:/keys/
+      - ./logs/orion:/var/log/
+      - ./config/orion/log-config.xml:/config/log-config.xml
+    networks:
+      orion_network:
+      partnera_blockchain_network:
+
+  member2orion:
+    << : *orion-def
+    environment:
+      - ORION_OTHERNODES=http://orion-dns-proxy:8081/,http://orion-dns-proxy:8083/
+      - ORION_NODEURL=http://orion-dns-proxy:8082
+      - LOG4J_CONFIGURATION_FILE=/config/log-config.xml
+    volumes:
+      - ./config/orion/orion.conf:/config/orion.conf
+      - ./config/orion/networkFiles/orion2:/keys/
+      - ./logs/orion:/var/log/
+      - ./config/orion/log-config.xml:/config/log-config.xml
+    networks:
+      orion_network:
+      partnerb_blockchain_network:
+
+  member3orion:
+    << : *orion-def
+    environment:
+      - ORION_OTHERNODES=http://orion-dns-proxy:8081/,http://orion-dns-proxy:8082/
+      - ORION_NODEURL=http://orion-dns-proxy:8083
+      - LOG4J_CONFIGURATION_FILE=/config/log-config.xml
+    volumes:
+      - ./config/orion/orion.conf:/config/orion.conf
+      - ./config/orion/networkFiles/orion3:/keys/
+      - ./logs/orion:/var/log/
+      - ./config/orion/log-config.xml:/config/log-config.xml
+    networks:
+      orion_network:
+      partnerc_blockchain_network:
+
+  member1besu:
+    << : *besu-def
+    entrypoint:
+      - /bin/bash
+      - -c
+      - |
+        while [ ! -f "/opt/besu/public-keys/bootnode_pubkey" ]; do sleep 5; done ;
+        /opt/besu/bin/besu \
+        --config-file=/config/config.toml \
+        --genesis-file=/config/genesis.json \
+        --node-private-key-file=/opt/besu/keys/key \
+        --min-gas-price=0 \
+        --privacy-enabled \
+        --privacy-url=http://member1orion:8888 \
+        --privacy-public-key-file=/config/orion/orion.pub \
+        --privacy-onchain-groups-enabled=${PRIVACY_ONCHAIN_GROUPS_ENABLED:-false} \
+        --rpc-http-api=EEA,WEB3,ETH,NET,PRIV,PERM,${BESU_CONS_API:-IBFT} \
+        --rpc-ws-api=EEA,WEB3,ETH,NET,PRIV,PERM,${BESU_CONS_API:-IBFT} ;
+    volumes:
+      - public-keys:/opt/besu/public-keys/
+      - ./config/besu/config.toml:/config/config.toml
+      - ./config/besu/log-config.xml:/config/log-config.xml
+      - ./logs/besu:/var/log/
+      - ./config/besu/${BESU_CONS_ALGO:-ibft2}Genesis.json:/config/genesis.json
+      - ./config/besu/networkFiles/member1/keys:/opt/besu/keys
+      - ./config/orion/networkFiles/orion1/nodeKey.pub:/config/orion/orion.pub
+      - ./config/besu/static-nodes-partnera.json:/config/static-nodes.json
+    depends_on:
+      - validator1
+      - member1orion
+    networks:
+      partnera_blockchain_network:
+
+  member2besu:
+    << : *besu-def
+    entrypoint:
+      - /bin/bash
+      - -c
+      - |
+        while [ ! -f "/opt/besu/public-keys/bootnode_pubkey" ]; do sleep 5; done ;
+        /opt/besu/bin/besu \
+        --config-file=/config/config.toml \
+        --genesis-file=/config/genesis.json \
+        --node-private-key-file=/opt/besu/keys/key \
+        --min-gas-price=0 \
+        --privacy-enabled \
+        --privacy-url=http://member2orion:8888 \
+        --privacy-public-key-file=/config/orion/orion.pub \
+        --privacy-onchain-groups-enabled=${PRIVACY_ONCHAIN_GROUPS_ENABLED:-false} \
+        --rpc-http-api=EEA,WEB3,ETH,NET,PRIV,PERM,${BESU_CONS_API:-IBFT} \
+        --rpc-ws-api=EEA,WEB3,ETH,NET,PRIV,PERM,${BESU_CONS_API:-IBFT} ;
+    volumes:
+      - public-keys:/opt/besu/public-keys/
+      - ./config/besu/config.toml:/config/config.toml
+      - ./config/besu/log-config.xml:/config/log-config.xml
+      - ./logs/besu:/var/log/
+      - ./config/besu/${BESU_CONS_ALGO:-ibft2}Genesis.json:/config/genesis.json
+      - ./config/besu/networkFiles/member2/keys:/opt/besu/keys
+      - ./config/orion/networkFiles/orion2/nodeKey.pub:/config/orion/orion.pub
+      - ./config/besu/static-nodes-partnerb.json:/config/static-nodes.json
+    depends_on:
+      - validator1
+      - member2orion
+    networks:
+      partnerb_blockchain_network:
+
+  member3besu:
+    << : *besu-def
+    entrypoint:
+      - /bin/bash
+      - -c
+      - |
+        while [ ! -f "/opt/besu/public-keys/bootnode_pubkey" ]; do sleep 5; done ;
+        /opt/besu/bin/besu \
+        --config-file=/config/config.toml \
+        --genesis-file=/config/genesis.json \
+        --node-private-key-file=/opt/besu/keys/key \
+        --min-gas-price=0 \
+        --privacy-enabled \
+        --privacy-url=http://member3orion:8888 \
+        --privacy-public-key-file=/config/orion/orion.pub \
+        --privacy-onchain-groups-enabled=${PRIVACY_ONCHAIN_GROUPS_ENABLED:-false} \
+        --rpc-http-api=EEA,WEB3,ETH,NET,PRIV,PERM,${BESU_CONS_API:-IBFT} \
+        --rpc-ws-api=EEA,WEB3,ETH,NET,PRIV,PERM,${BESU_CONS_API:-IBFT} ;
+    volumes:
+      - public-keys:/opt/besu/public-keys/
+      - ./config/besu/config.toml:/config/config.toml
+      - ./config/besu/log-config.xml:/config/log-config.xml
+      - ./logs/besu:/var/log/
+      - ./config/besu/${BESU_CONS_ALGO:-ibft2}Genesis.json:/config/genesis.json
+      - ./config/besu/networkFiles/member3/keys:/opt/besu/keys
+      - ./config/orion/networkFiles/orion3/nodeKey.pub:/config/orion/orion.pub
+      - ./config/besu/static-nodes-partnerc.json:/config/static-nodes.json
+    depends_on:
+      - validator1
+      - member3orion
+    networks:
+      partnerc_blockchain_network:
+
+volumes:
+  public-keys:
+
+networks:
+  internet_network:
+    driver: bridge
+  partnera_blockchain_network:
+    driver: bridge
+  partnerb_blockchain_network:
+    driver: bridge
+  partnerc_blockchain_network:
+    driver: bridge
+  orion_network:
+    driver: bridge
