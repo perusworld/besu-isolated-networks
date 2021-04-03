@@ -27,15 +27,15 @@ init_nssdb() {
 import_ca() {
     echo "importing ca cert $2.der into ../export/$1/nssdb"
     certutil -A -d dbm:../export/$1/nssdb -n "$2" -t "CT,C,C" -f ../export/$1/nsspin.txt -i $2.der
-    echo "importing ca cert $2.crt into ../export/$1/$1-truststore.jks"
-    keytool -importcert -trustcacerts -noprompt -alias $2 -storetype JKS -storepass $STOREPASS -keystore ../export/$1/$1-truststore.jks -file $2.der 
+    echo "importing ca cert $2.crt into ../export/$1/truststore.jks"
+    keytool -importcert -trustcacerts -noprompt -alias $2 -storetype JKS -storepass $STOREPASS -keystore ../export/$1/truststore.jks -file $2.der 
 }
 
 import_client() {
     echo "importing client keys $1.pfx into ../export/$1/nssdb"
     pk12util -d dbm:../export/$1/nssdb -k ../export/$1/nsspin.txt -w ../export/$1/nsspin.txt -i $1.pfx -n $1
-    echo "importing client keys $1.pfx into ../export/$1/$1.jks"
-    keytool -importkeystore -noprompt -srcstoretype PKCS12 -srcstorepass $STOREPASS -deststorepass $STOREPASS -destkeystore ../export/$1/$1.jks -srckeystore $1.pfx 
+    echo "importing client keys $1.pfx into ../export/$1/keystore.jks"
+    keytool -importkeystore -noprompt -srcstoretype PKCS12 -srcstorepass $STOREPASS -deststorepass $STOREPASS -destkeystore ../export/$1/keystore.jks -srckeystore $1.pfx 
 }
 
 gen_p12() {
@@ -47,7 +47,7 @@ gen_p12() {
 copy_p12() {
     # Copy p12 file
     echo "copying p12 for $1"
-    cp $1.pfx ../export/$1/$1.p12
+    cp $1.pfx ../export/$1/keys.p12
 }
 
 gen_root() {
@@ -115,10 +115,10 @@ gen_partner_client() {
     import_client "$1"
     echo "
 name = NSScrypto-$1
-nssSecmodDirectory = $CWD/generated/nssdb/$1/nssdb
+nssSecmodDirectory = /opt/besu/p2p-ssl/nssdb
 nssDbMode = readOnly
 nssModule = keystore
-    " >> ../export/$1/$1.cfg
+    " >> ../export/$1/nss.cfg
 }
 
 init
