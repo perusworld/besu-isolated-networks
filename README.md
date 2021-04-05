@@ -1,5 +1,10 @@
 # Besu Isolated Networks
 
+## Ensure [p2p-over-ssl branch](https://github.com/perusworld/besu/tree/p2p-over-ssl) docker images
+```bash
+./gradlew clean spotlessApply build -x test -x acceptanceTest distDocker
+```
+
 
 ## Key Configs
 ```
