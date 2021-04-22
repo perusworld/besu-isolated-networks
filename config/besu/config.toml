@@ -26,11 +26,27 @@ metrics-host="0.0.0.0"
 metrics-port=9545
 
 # permissions
+
 permissions-nodes-config-file-enabled=false
 
-discovery-enabled=false
+
+
+
+
+# static nodes
 static-nodes-file="/config/static-nodes.json"
-nat-method="NONE"
-p2p-host="0.0.0.0"
+
+
+# p2p discovery
+
+discovery-enabled=false
+
+
+
+
+# dns
 Xdns-enabled=true
 Xdns-update-enabled=true
+
+
+min-gas-price=0
