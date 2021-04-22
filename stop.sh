@@ -22,7 +22,7 @@ echo "*************************************${normal}"
 echo "Stopping network"
 echo "----------------------------------"
 
-docker-compose stop
+docker-compose -f docker-compose.yml -f docker-compose-override.yml stop
 sleep 60
 
 if [ -f "docker-compose-deps.yml" ]; then

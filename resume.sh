@@ -28,5 +28,5 @@ if [ -f "docker-compose-deps.yml" ]; then
     sleep 60
 fi
 
-docker-compose start
+docker-compose -f docker-compose.yml -f docker-compose-override.yml start
 
