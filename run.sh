@@ -32,8 +32,8 @@ if [ -f "docker-compose-deps.yml" ]; then
 fi
 
 echo "Starting network..."
-docker-compose build --pull
-docker-compose up --detach
+docker-compose -f docker-compose.yml -f docker-compose-override.yml build --pull
+docker-compose -f docker-compose.yml -f docker-compose-override.yml up --detach
 
 #list services and endpoints
 ./list.sh
