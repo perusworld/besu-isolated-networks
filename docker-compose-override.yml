@@ -1,8 +1,6 @@
 ---
 version: '3.6'
-
 services:
-
   orion-dns-proxy:
     restart: "on-failure"
     image: haproxy:${HAPROXY_VERSION:-latest}
@@ -13,106 +11,97 @@ services:
     networks:
       internet_network:
       orion_network:
-
   partnera-firewall:
     restart: "on-failure"
     image: haproxy:${HAPROXY_VERSION:-latest}
     volumes:
       - ./config/haproxy/haproxy-partnera.cfg:/usr/local/etc/haproxy/haproxy.cfg
+      - ./config/besu/p2p-ssl/partnera-firewall/ssl.pem:/etc/ssl/certs/ssl.pem
+      - ./config/besu/p2p-ssl/partnera-firewall/ssl-ca.pem:/etc/ssl/certs/ssl-ca.pem
     ports:
       - 12037:12037
       - 20000:20000
     networks:
       internet_network:
       partnera_blockchain_network:
-
   partnerb-firewall:
     restart: "on-failure"
     image: haproxy:${HAPROXY_VERSION:-latest}
     volumes:
       - ./config/haproxy/haproxy-partnerb.cfg:/usr/local/etc/haproxy/haproxy.cfg
+      - ./config/besu/p2p-ssl/partnerb-firewall/ssl.pem:/etc/ssl/certs/ssl.pem
+      - ./config/besu/p2p-ssl/partnerb-firewall/ssl-ca.pem:/etc/ssl/certs/ssl-ca.pem
     ports:
       - 12038:12038
       - 20003:20000
     networks:
       internet_network:
       partnerb_blockchain_network:
-
   partnerc-firewall:
     restart: "on-failure"
     image: haproxy:${HAPROXY_VERSION:-latest}
     volumes:
       - ./config/haproxy/haproxy-partnerc.cfg:/usr/local/etc/haproxy/haproxy.cfg
+      - ./config/besu/p2p-ssl/partnerc-firewall/ssl.pem:/etc/ssl/certs/ssl.pem
+      - ./config/besu/p2p-ssl/partnerc-firewall/ssl-ca.pem:/etc/ssl/certs/ssl-ca.pem
     ports:
       - 12039:12039
       - 20006:20000
     networks:
       internet_network:
       partnerc_blockchain_network:
-
   validator1:
     volumes:
       - ./config/besu/static-nodes-partnera.json:/config/static-nodes.json
     networks:
       partnera_blockchain_network:
-
   validator2:
     volumes:
       - ./config/besu/static-nodes-partnera.json:/config/static-nodes.json
     networks:
       partnera_blockchain_network:
-
   validator3:
     volumes:
       - ./config/besu/static-nodes-partnerb.json:/config/static-nodes.json
     networks:
       partnerb_blockchain_network:
-
   validator4:
     volumes:
       - ./config/besu/static-nodes-partnerc.json:/config/static-nodes.json
     networks:
       partnerc_blockchain_network:
-
   rpcnode:
     volumes:
       - ./config/besu/static-nodes-partnera.json:/config/static-nodes.json
     networks:
       partnera_blockchain_network:
-
   member1orion:
     networks:
       orion_network:
       partnera_blockchain_network:
-
   member2orion:
     networks:
       orion_network:
       partnerb_blockchain_network:
-
   member3orion:
     networks:
       orion_network:
       partnerc_blockchain_network:
-
   member1besu:
     volumes:
       - ./config/besu/static-nodes-partnera.json:/config/static-nodes.json
     networks:
       partnera_blockchain_network:
-
   member2besu:
     volumes:
       - ./config/besu/static-nodes-partnerb.json:/config/static-nodes.json
     networks:
       partnerb_blockchain_network:
-
   member3besu:
     volumes:
       - ./config/besu/static-nodes-partnerc.json:/config/static-nodes.json
     networks:
       partnerc_blockchain_network:
-
   explorer:
     networks:
       partnera_blockchain_network:
