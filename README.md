@@ -1,10 +1,22 @@
 # Besu Isolated Networks
 
-## Ensure [p2p-over-ssl branch](https://github.com/perusworld/besu/tree/p2p-over-ssl) docker images
+## Network Topology
+![Network Topology](/network-topology.png)
+
+## To build, checkout and build [p2p-over-ssl branch](https://github.com/perusworld/besu/tree/p2p-over-ssl) docker images
 ```bash
 ./gradlew clean spotlessApply build -x test -x acceptanceTest distDocker
 ```
-
+## To Run
+```bash
+./run.sh
+```
+## To Test
+```bash
+cd smart_contracts
+npm install
+node scripts/deploy.js
+```
 
 ## Key Configs
 ```
@@ -19,6 +31,3 @@ Xdns-update-enabled=true
 
 ```
 
-
-## Network Topology
-![Network Topology](/network-topology.png)
