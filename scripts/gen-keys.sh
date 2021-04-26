@@ -96,7 +96,7 @@ gen_intermediate() {
 }
 
 gen_partner_intermediate() {
-    gen_signed "$1ca" "$1" "$2" "v3_inter_ca"
+    gen_signed "$1ca" "$1" "$2" "v3_partner_inter_ca"
 
     cat "$1ca.cer" $2.crts > "$1ca.crts"
 
@@ -107,6 +107,8 @@ gen_partner_client() {
     init_nssdb "$1"
     gen_signed "$1" "$2" "$2ca" "usr_cert"
     cat "$1.cer" "$2ca.crts" > "$1.crts"
+    cat "$1.key" "$1.crts" > ../export/$1/ssl.pem
+    cat "$2ca.crts" > ../export/$1/ssl-ca.pem
     gen_p12 "$1" "$2ca"
     copy_p12 "$1"
     import_ca "$1" "ca"
