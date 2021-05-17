@@ -3,7 +3,7 @@
 ## Network Topology
 ![Network Topology](/network-topology.png)
 
-## To build, checkout and build [p2p-over-ssl branch](https://github.com/perusworld/besu/tree/p2p-over-ssl) docker images
+## To build. Checkout and build [p2p-over-ssl branch](https://github.com/perusworld/besu/tree/p2p-over-ssl) docker images
 ```bash
 ./gradlew clean spotlessApply build -x test -x acceptanceTest distDocker
 ```

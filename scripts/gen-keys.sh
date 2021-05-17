@@ -88,7 +88,7 @@ gen_signed() {
 }
 
 gen_intermediate() {
-    gen_signed "$1" "admin" "ca" "v3_inter_ca"
+    gen_signed "$1" "admin" "$2" "v3_inter_ca"
 
     cat $1.cer $2.cer > $1.crts
 
@@ -111,8 +111,8 @@ gen_partner_client() {
     cat "$2ca.crts" > ../export/$1/ssl-ca.pem
     gen_p12 "$1" "$2ca"
     copy_p12 "$1"
-    import_ca "$1" "ca"
-    import_ca "$1" "interca"
+    import_ca "$1" "$4"
+    import_ca "$1" "$3"
     import_ca "$1" "$2ca"
     import_client "$1"
     echo "
@@ -127,27 +127,38 @@ init
 gen_root "ca"
 gen_intermediate "interca" "ca"
 
-gen_partner_client "orion-dns-proxy" "interca"
+gen_root "invca"
+gen_intermediate "interinvca" "invca"
+
+gen_partner_intermediate "partnero" "interca"
+gen_partner_client "orion-dns-proxy" "partnero" "interca" "ca"
 
 gen_partner_intermediate "partnera" "interca"
-gen_partner_client "partnera-firewall" "partnera"
-gen_partner_client "validator1" "partnera"
-gen_partner_client "validator2" "partnera"
-gen_partner_client "rpcnode" "partnera"
-gen_partner_client "explorer" "partnera"
-gen_partner_client "member1besu" "partnera"
-gen_partner_client "member1orion" "partnera"
+gen_partner_client "partnera-firewall" "partnera" "interca" "ca"
+gen_partner_client "validator1" "partnera" "interca" "ca"
+gen_partner_client "validator2" "partnera" "interca" "ca"
+gen_partner_client "rpcnode" "partnera" "interca" "ca"
+gen_partner_client "explorer" "partnera" "interca" "ca"
+gen_partner_client "member1besu" "partnera" "interca" "ca"
+gen_partner_client "member1orion" "partnera" "interca" "ca"
 
 gen_partner_intermediate "partnerb" "interca"
-gen_partner_client "partnerb-firewall" "partnerb"
-gen_partner_client "validator3" "partnerb"
-gen_partner_client "member2besu" "partnerb"
-gen_partner_client "member2orion" "partnerb"
+gen_partner_client "partnerb-firewall" "partnerb" "interca" "ca"
+gen_partner_client "validator3" "partnerb" "interca" "ca"
+gen_partner_client "member2besu" "partnerb" "interca" "ca"
+gen_partner_client "member2orion" "partnerb" "interca" "ca"
 
 gen_partner_intermediate "partnerc" "interca"
-gen_partner_client "partnerc-firewall" "partnerc"
-gen_partner_client "validator4" "partnerc"
-gen_partner_client "member3besu" "partnerc"
-gen_partner_client "member3orion" "partnerc"
+gen_partner_client "partnerc-firewall" "partnerc" "interca" "ca"
+gen_partner_client "validator4" "partnerc" "interca" "ca"
+gen_partner_client "member3besu" "partnerc" "interca" "ca"
+gen_partner_client "member3orion" "partnerc" "interca" "ca"
+
+gen_partner_intermediate "partnerinv" "interinvca"
+gen_partner_client "partnerinv-firewall" "partnerc" "interinvca" "invca"
+gen_partner_client "validatorinv5" "partnerinv" "interinvca" "invca"
+gen_partner_client "memberinv4besu" "partnerinv" "interinvca" "invca"
+gen_partner_client "memberinv4orion" "partnerinv" "interinvca" "invca"
 
 print_cert "validator1"
+print_cert "validatorinv5"
