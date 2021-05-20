@@ -189,9 +189,9 @@ services:
         --genesis-file=/config/genesis.json \
         --node-private-key-file=/opt/besu/keys/key \
         --privacy-enabled \
-        --privacy-url=http://member1orion:8888 \
-        --privacy-public-key-file=/config/orion/orion.pub \
         --privacy-onchain-groups-enabled=false \
+        --privacy-public-key-file=/config/tessera/tessera.pub \
+        --privacy-url=http://member1tessera:9101 \
         --p2p-ssl-enabled \
         --p2p-ssl-keystore-type=JKS \
         --p2p-ssl-keystore-file=/opt/besu/p2p-ssl/keystore.jks \
@@ -208,25 +208,95 @@ services:
       - ./logs/besu:/tmp/besu
       - ./config/besu/ibft2Genesis.json:/config/genesis.json
       - ./config/besu/networkFiles/member1/keys:/opt/besu/keys
-      - ./config/orion/networkFiles/orion1/nodeKey.pub:/config/orion/orion.pub
+      - ./config/tessera/networkFiles/tessera1/nodeKey.pub:/config/tessera/tessera.pub
       - ./config/besu/p2p-ssl/member1besu:/opt/besu/p2p-ssl
       - ./config/besu/static-nodes.json:/config/static-nodes.json
     depends_on:
-      - member1orion
+      - member1tessera
       - validator1
-  member1orion:
-    image: consensys/quorum-orion:${QUORUM_ORION_VERSION:-latest}
-    command: ["/config/orion.conf"]
-    environment:    
-      - ORION_OTHERNODES=http://member2orion:8080/,http://member3orion:8080/
-      - ORION_NODEURL=http://member1orion:8080
-      - ORION_CLIENTURL=http://member1orion:8888
-      - LOG4J_CONFIGURATION_FILE=/config/log-config.xml
+  member1tessera:
+    image: quorumengineering/tessera:${QUORUM_TESSERA_VERSION:-21.1.1}
+    restart: "no"
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "--proxy", "off", "http://localhost:9000/upcheck"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+      start_period: 5s
+    entrypoint:
+      - /bin/sh
+      - -c
+      - |
+        mkdir -p /var/log/tessera/;
+        mkdir -p /data/tm/;
+        cp /config/keys/tm.* /data/tm/ ;
+          cat <<EOF > /data/tm/tessera-config-09.json
+          {
+            "mode": "orion",
+            "useWhiteList": false,
+            "jdbc": {
+              "username": "sa",
+              "password": "",
+              "url": "jdbc:h2:./data/tm/db;MODE=Oracle;TRACE_LEVEL_SYSTEM_OUT=0",
+              "autoCreateTables": true
+            },
+            "serverConfigs":[
+            {
+              "app":"ThirdParty",
+              "enabled": true,
+              "serverAddress": "http://member1tessera:9080",
+              "communicationType" : "REST"
+            },
+            {
+              "app":"Q2T",
+              "enabled": true,
+              "serverAddress": "http://member1tessera:9101",
+              "sslConfig": {
+                "tls": "OFF"
+              },
+              "communicationType" : "REST"
+            },
+            {
+              "app":"P2P",
+              "enabled": true,
+              "serverAddress": "http://member1tessera:9000",
+              "sslConfig": {
+                "tls": "OFF"
+              },
+              "communicationType" : "REST"
+            }
+            ],
+            "peer": [
+                {
+                    "url": "http://member1tessera:9000"
+                },
+                {
+                    "url": "http://member2tessera:9000"
+                },
+                {
+                    "url": "http://member3tessera:9000"
+                }
+            ],
+            "keys": {
+              "passwords": [],
+              "keyData": [
+                {
+                  "config": $$(cat /data/tm/tm.key),
+                  "publicKey": "$$(cat /data/tm/tm.pub)"
+                }
+              ]
+            },
+            "alwaysSendTo": []
+          }
+        EOF
+          cat /data/tm/tessera-config-09.json
+          java -Xms128M -Xmx128M -jar /tessera/tessera-app.jar --debug -configfile /data/tm/tessera-config-09.json &> /var/log/tessera/tessera-$$HOSTNAME.log | tee -a /var/log/tessera/tessera-$$HOSTNAME.log
+    environment:
+      - TESSERA_CONFIG_TYPE="-09"
     volumes:
-      - ./config/orion/orion.conf:/config/orion.conf
-      - ./config/orion/networkFiles/orion1:/keys/
-      - ./logs/orion:/tmp/orion
-      - ./config/orion/log-config.xml:/config/log-config.xml
+      - ./config/tessera/networkFiles/tessera1:/config/keys
+      - member1tessera:/data
+      - ./logs/tessera:/var/log/tessera/      
   member2besu:
     restart: "on-failure"
     image: hyperledger/besu:${BESU_VERSION:-latest}
@@ -242,9 +312,9 @@ services:
         --genesis-file=/config/genesis.json \
         --node-private-key-file=/opt/besu/keys/key \
         --privacy-enabled \
-        --privacy-url=http://member2orion:8888 \
-        --privacy-public-key-file=/config/orion/orion.pub \
         --privacy-onchain-groups-enabled=false \
+        --privacy-public-key-file=/config/tessera/tessera.pub \
+        --privacy-url=http://member2tessera:9101 \
         --p2p-ssl-enabled \
         --p2p-ssl-keystore-type=JKS \
         --p2p-ssl-keystore-file=/opt/besu/p2p-ssl/keystore.jks \
@@ -261,25 +331,95 @@ services:
       - ./logs/besu:/tmp/besu
       - ./config/besu/ibft2Genesis.json:/config/genesis.json
       - ./config/besu/networkFiles/member2/keys:/opt/besu/keys
-      - ./config/orion/networkFiles/orion2/nodeKey.pub:/config/orion/orion.pub
+      - ./config/tessera/networkFiles/tessera2/nodeKey.pub:/config/tessera/tessera.pub
       - ./config/besu/p2p-ssl/member2besu:/opt/besu/p2p-ssl
       - ./config/besu/static-nodes.json:/config/static-nodes.json
     depends_on:
-      - member2orion
+      - member2tessera
       - validator1
-  member2orion:
-    image: consensys/quorum-orion:${QUORUM_ORION_VERSION:-latest}
-    command: ["/config/orion.conf"]
-    environment:    
-      - ORION_OTHERNODES=http://member1orion:8080/,http://member3orion:8080/
-      - ORION_NODEURL=http://member2orion:8080
-      - ORION_CLIENTURL=http://member2orion:8888
-      - LOG4J_CONFIGURATION_FILE=/config/log-config.xml
+  member2tessera:
+    image: quorumengineering/tessera:${QUORUM_TESSERA_VERSION:-21.1.1}
+    restart: "no"
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "--proxy", "off", "http://localhost:9000/upcheck"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+      start_period: 5s
+    entrypoint:
+      - /bin/sh
+      - -c
+      - |
+        mkdir -p /var/log/tessera/;
+        mkdir -p /data/tm/;
+        cp /config/keys/tm.* /data/tm/ ;
+          cat <<EOF > /data/tm/tessera-config-09.json
+          {
+            "mode": "orion",
+            "useWhiteList": false,
+            "jdbc": {
+              "username": "sa",
+              "password": "",
+              "url": "jdbc:h2:./data/tm/db;MODE=Oracle;TRACE_LEVEL_SYSTEM_OUT=0",
+              "autoCreateTables": true
+            },
+            "serverConfigs":[
+            {
+              "app":"ThirdParty",
+              "enabled": true,
+              "serverAddress": "http://member2tessera:9080",
+              "communicationType" : "REST"
+            },
+            {
+              "app":"Q2T",
+              "enabled": true,
+              "serverAddress": "http://member2tessera:9101",
+              "sslConfig": {
+                "tls": "OFF"
+              },
+              "communicationType" : "REST"
+            },
+            {
+              "app":"P2P",
+              "enabled": true,
+              "serverAddress": "http://member2tessera:9000",
+              "sslConfig": {
+                "tls": "OFF"
+              },
+              "communicationType" : "REST"
+            }
+            ],
+            "peer": [
+                {
+                    "url": "http://member1tessera:9000"
+                },
+                {
+                    "url": "http://member2tessera:9000"
+                },
+                {
+                    "url": "http://member3tessera:9000"
+                }
+            ],
+            "keys": {
+              "passwords": [],
+              "keyData": [
+                {
+                  "config": $$(cat /data/tm/tm.key),
+                  "publicKey": "$$(cat /data/tm/tm.pub)"
+                }
+              ]
+            },
+            "alwaysSendTo": []
+          }
+        EOF
+          cat /data/tm/tessera-config-09.json
+          java -Xms128M -Xmx128M -jar /tessera/tessera-app.jar --debug -configfile /data/tm/tessera-config-09.json &> /var/log/tessera/tessera-$$HOSTNAME.log | tee -a /var/log/tessera/tessera-$$HOSTNAME.log
+    environment:
+      - TESSERA_CONFIG_TYPE="-09"
     volumes:
-      - ./config/orion/orion.conf:/config/orion.conf
-      - ./config/orion/networkFiles/orion2:/keys/
-      - ./logs/orion:/tmp/orion
-      - ./config/orion/log-config.xml:/config/log-config.xml
+      - ./config/tessera/networkFiles/tessera2:/config/keys
+      - member2tessera:/data
+      - ./logs/tessera:/var/log/tessera/      
   member3besu:
     restart: "on-failure"
     image: hyperledger/besu:${BESU_VERSION:-latest}
@@ -295,9 +435,9 @@ services:
         --genesis-file=/config/genesis.json \
         --node-private-key-file=/opt/besu/keys/key \
         --privacy-enabled \
-        --privacy-url=http://member3orion:8888 \
-        --privacy-public-key-file=/config/orion/orion.pub \
         --privacy-onchain-groups-enabled=false \
+        --privacy-public-key-file=/config/tessera/tessera.pub \
+        --privacy-url=http://member3tessera:9101 \
         --p2p-ssl-enabled \
         --p2p-ssl-keystore-type=JKS \
         --p2p-ssl-keystore-file=/opt/besu/p2p-ssl/keystore.jks \
@@ -314,25 +454,95 @@ services:
       - ./logs/besu:/tmp/besu
       - ./config/besu/ibft2Genesis.json:/config/genesis.json
       - ./config/besu/networkFiles/member3/keys:/opt/besu/keys
-      - ./config/orion/networkFiles/orion3/nodeKey.pub:/config/orion/orion.pub
+      - ./config/tessera/networkFiles/tessera3/nodeKey.pub:/config/tessera/tessera.pub
       - ./config/besu/p2p-ssl/member3besu:/opt/besu/p2p-ssl
       - ./config/besu/static-nodes.json:/config/static-nodes.json
     depends_on:
-      - member3orion
+      - member3tessera
       - validator1
-  member3orion:
-    image: consensys/quorum-orion:${QUORUM_ORION_VERSION:-latest}
-    command: ["/config/orion.conf"]
-    environment:    
-      - ORION_OTHERNODES=http://member1orion:8080/,http://member2orion:8080/
-      - ORION_NODEURL=http://member3orion:8080
-      - ORION_CLIENTURL=http://member3orion:8888
-      - LOG4J_CONFIGURATION_FILE=/config/log-config.xml
+  member3tessera:
+    image: quorumengineering/tessera:${QUORUM_TESSERA_VERSION:-21.1.1}
+    restart: "no"
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "--proxy", "off", "http://localhost:9000/upcheck"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+      start_period: 5s
+    entrypoint:
+      - /bin/sh
+      - -c
+      - |
+        mkdir -p /var/log/tessera/;
+        mkdir -p /data/tm/;
+        cp /config/keys/tm.* /data/tm/ ;
+          cat <<EOF > /data/tm/tessera-config-09.json
+          {
+            "mode": "orion",
+            "useWhiteList": false,
+            "jdbc": {
+              "username": "sa",
+              "password": "",
+              "url": "jdbc:h2:./data/tm/db;MODE=Oracle;TRACE_LEVEL_SYSTEM_OUT=0",
+              "autoCreateTables": true
+            },
+            "serverConfigs":[
+            {
+              "app":"ThirdParty",
+              "enabled": true,
+              "serverAddress": "http://member3tessera:9080",
+              "communicationType" : "REST"
+            },
+            {
+              "app":"Q2T",
+              "enabled": true,
+              "serverAddress": "http://member3tessera:9101",
+              "sslConfig": {
+                "tls": "OFF"
+              },
+              "communicationType" : "REST"
+            },
+            {
+              "app":"P2P",
+              "enabled": true,
+              "serverAddress": "http://member3tessera:9000",
+              "sslConfig": {
+                "tls": "OFF"
+              },
+              "communicationType" : "REST"
+            }
+            ],
+            "peer": [
+                {
+                    "url": "http://member1tessera:9000"
+                },
+                {
+                    "url": "http://member2tessera:9000"
+                },
+                {
+                    "url": "http://member3tessera:9000"
+                }
+            ],
+            "keys": {
+              "passwords": [],
+              "keyData": [
+                {
+                  "config": $$(cat /data/tm/tm.key),
+                  "publicKey": "$$(cat /data/tm/tm.pub)"
+                }
+              ]
+            },
+            "alwaysSendTo": []
+          }
+        EOF
+          cat /data/tm/tessera-config-09.json
+          java -Xms128M -Xmx128M -jar /tessera/tessera-app.jar --debug -configfile /data/tm/tessera-config-09.json &> /var/log/tessera/tessera-$$HOSTNAME.log | tee -a /var/log/tessera/tessera-$$HOSTNAME.log
+    environment:
+      - TESSERA_CONFIG_TYPE="-09"
     volumes:
-      - ./config/orion/orion.conf:/config/orion.conf
-      - ./config/orion/networkFiles/orion3:/keys/
-      - ./logs/orion:/tmp/orion
-      - ./config/orion/log-config.xml:/config/log-config.xml
+      - ./config/tessera/networkFiles/tessera3:/config/keys
+      - member3tessera:/data
+      - ./logs/tessera:/var/log/tessera/      
   explorer:
     build: block-explorer-light/.
     image: quorum-dev-quickstart/block-explorer-light:develop
@@ -345,3 +555,6 @@ volumes:
   prometheus:
   grafana:
   cakeshop:
+  member1tessera:
+  member2tessera:
+  member3tessera:

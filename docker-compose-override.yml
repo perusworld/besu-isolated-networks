@@ -1,16 +1,19 @@
 ---
 version: '3.6'
 services:
-  orion-dns-proxy:
+  tessera-dns-proxy:
     restart: "on-failure"
     image: haproxy:${HAPROXY_VERSION:-latest}
     volumes:
-      - ./config/haproxy/haproxy-orion.cfg:/usr/local/etc/haproxy/haproxy.cfg
+      - ./config/haproxy/haproxy-tessera.cfg:/usr/local/etc/haproxy/haproxy.cfg
     ports:
       - 12036:12036
+      - 9001:9001
+      - 9002:9002
+      - 9003:9003
     networks:
       internet_network:
-      orion_network:
+      tessera_network:
   partnera-firewall:
     restart: "on-failure"
     image: haproxy:${HAPROXY_VERSION:-latest}
@@ -75,17 +78,17 @@ services:
       - ./config/besu/static-nodes-partnera.json:/config/static-nodes.json
     networks:
       partnera_blockchain_network:
-  member1orion:
+  member1tessera:
     networks:
-      orion_network:
+      tessera_network:
       partnera_blockchain_network:
-  member2orion:
+  member2tessera:
     networks:
-      orion_network:
+      tessera_network:
       partnerb_blockchain_network:
-  member3orion:
+  member3tessera:
     networks:
-      orion_network:
+      tessera_network:
       partnerc_blockchain_network:
   member1besu:
     volumes:
@@ -115,5 +118,5 @@ networks:
     driver: bridge
   partnerc_blockchain_network:
     driver: bridge
-  orion_network:
+  tessera_network:
     driver: bridge
