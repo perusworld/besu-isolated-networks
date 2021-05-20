@@ -11,6 +11,8 @@ init() {
     mkdir -p generated/export
     rm -rf generated/keys/* generated/export/*
     cd generated/keys
+    touch crl-index
+    echo 00 > crl-number
 }
 
 print_cert() {
@@ -50,6 +52,15 @@ copy_p12() {
     cp $1.pfx ../export/$1/keys.p12
 }
 
+gen_crl() {
+    openssl ca -gencrl -keyfile $1.key -cert $1.crt -out $1_crl.pem -config ../../ssl.conf
+    openssl crl -in $1_crl.pem -noout -text
+}
+
+cat_crl() {
+    cat *_crl.pem  > crl.pem
+}
+
 gen_root() {
     # Generate self signed root CA cert
     openssl req -days 720 -$SHA -nodes -x509 -newkey $RSA -keyout $1.key -out $1.crt -extensions v3_ca -subj "/C=US/ST=CA/L=SFO/O=MC/OU=root/CN=root$1.admin/emailAddress=root$1@admin.com"
@@ -67,6 +78,7 @@ gen_root() {
 
     # Create p12 file
     openssl pkcs12 -export -out $1.pfx -inkey $1.key -in $1.crt -password pass:"$NSSPIN"
+
 }
 
 gen_signed() {
@@ -123,6 +135,28 @@ nssModule = keystore
     " >> ../export/$1/nss.cfg
 }
 
+revoke_cert() {
+    openssl ca -revoke $1.crt -keyfile $2.key -cert $2.crt -config ../../ssl.conf
+
+    #generate crl
+    gen_crl "$2"
+
+}
+
+verify_cert() {
+    cat $2ca.crts $2ca_crl.pem > test.pem
+    openssl verify -extended_crl -verbose -CAfile test.pem -crl_check $1.crt
+}
+
+verify_common_cert() {
+    cat $2ca.crts crl.pem > test.pem
+    openssl verify -extended_crl -verbose -CAfile test.pem -crl_check $1.crt
+}
+
+copy_crl() {
+    for d in ../export/*; do cp crl.pem "$d"; done    
+}
+
 init
 gen_root "ca"
 gen_intermediate "interca" "ca"
@@ -160,5 +194,23 @@ gen_partner_client "validatorinv5" "partnerinv" "interinvca" "invca"
 gen_partner_client "memberinv4besu" "partnerinv" "interinvca" "invca"
 gen_partner_client "memberinv4orion" "partnerinv" "interinvca" "invca"
 
-print_cert "validator1"
-print_cert "validatorinv5"
+gen_partner_client "validator5rvk" "partnera" "interca" "ca"
+gen_partner_client "validator6rvk" "partnera" "interca" "ca"
+gen_partner_client "validator7rvk" "partnerb" "interca" "ca"
+
+revoke_cert "validator5rvk" "partneraca"
+revoke_cert "validator6rvk" "partneraca"
+revoke_cert "validator7rvk" "partnerbca"
+
+cat_crl
+
+verify_common_cert  "validator5rvk" "partnera" "interca" "ca"
+verify_common_cert  "validator6rvk" "partnera" "interca" "ca"
+verify_common_cert  "validator7rvk" "partnerb" "interca" "ca"
+verify_common_cert  "validator1" "partnera"
+verify_common_cert  "validator3" "partnerb"
+
+copy_crl
+
+# print_cert "validator1"
+# print_cert "validatorinv5"
