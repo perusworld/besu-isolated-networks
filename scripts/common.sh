@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 NSSPIN="test123"
 STOREPASS="test123"
@@ -7,6 +7,7 @@ SHA="sha256"
 RSA="rsa:2048"
 DAYS="36500"
 NSS_CFG_USE_COMMON="true"
+NSS_DIR_PATH=""
 
 init() {
     mkdir -p generated/keys
@@ -132,7 +133,12 @@ gen_partner_client() {
     SEC_MOD_DIR="/opt/besu/p2p-ssl/nssdb"
     if [[ "$NSS_CFG_USE_COMMON" == "false" ]]
     then
-        SEC_MOD_DIR="$CWD/generated/nssdb/$1/nssdb"
+        if [[ "$NSS_DIR_PATH" == "" ]]
+        then
+            SEC_MOD_DIR="$CWD/generated/nssdb/$1/nssdb"
+        else
+            SEC_MOD_DIR="$NSS_DIR_PATH/$1/nssdb"
+        fi
     fi
     echo "
 name = NSScrypto-$1

@@ -56,6 +56,3 @@ verify_common_cert  "validator1" "partnera"
 verify_common_cert  "validator3" "partnerb"
 
 copy_crl
-
-# print_cert "validator1"
-# print_cert "validatorinv5"
