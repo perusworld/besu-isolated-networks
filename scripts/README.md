@@ -1,5 +1,8 @@
 # Generate Keys
 
+## Sample Cert Tree
+![Cer Tree](cert-tree.png)
+
 Make sure to run with JDK 11 in path, anything higher will result in keystore load related errors like "Algorithm HmacPBESHA256 not available" 
 
 might have to install 
