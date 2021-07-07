@@ -3,7 +3,7 @@
 . ./common.sh
 
 NSS_CFG_USE_COMMON="false"
-NSS_DIR_PATH="./src/test/resources/p2p-ssl"
+NSS_DIR_PATH="./src/test/resources/p2p-tls"
 
 init
 gen_root "ca"

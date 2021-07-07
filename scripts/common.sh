@@ -130,7 +130,7 @@ gen_partner_client() {
     import_ca "$1" "$3"
     import_ca "$1" "$2ca"
     import_client "$1"
-    SEC_MOD_DIR="/opt/besu/p2p-ssl/nssdb"
+    SEC_MOD_DIR="/opt/besu/p2p-tls/nssdb"
     if [[ "$NSS_CFG_USE_COMMON" == "false" ]]
     then
         if [[ "$NSS_DIR_PATH" == "" ]]
