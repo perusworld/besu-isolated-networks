@@ -15,10 +15,12 @@ gen_partner_client "validator" "partnera" "interca" "ca"
 gen_partner_client "nonValidator" "partnera" "interca" "ca"
 gen_partner_client "non-validator" "partnera" "interca" "ca"
 gen_partner_client "miner1" "partnera" "interca" "ca"
+gen_partner_client "node1" "partnera" "interca" "ca"
 
 gen_partner_intermediate "partnerb" "interca"
 gen_partner_client "validator2" "partnerb" "interca" "ca"
 gen_partner_client "miner2" "partnerb" "interca" "ca"
+gen_partner_client "node2" "partnerb" "interca" "ca"
 
 gen_partner_intermediate "partnerc" "interca"
 gen_partner_client "validator3" "partnerc" "interca" "ca"
