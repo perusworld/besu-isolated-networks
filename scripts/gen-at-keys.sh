@@ -11,6 +11,8 @@ gen_intermediate "interca" "ca"
 
 gen_partner_intermediate "partnera" "interca"
 gen_partner_client "validator1" "partnera" "interca" "ca"
+gen_partner_client "validator" "partnera" "interca" "ca"
+gen_partner_client "nonValidator" "partnera" "interca" "ca"
 gen_partner_client "non-validator" "partnera" "interca" "ca"
 gen_partner_client "miner1" "partnera" "interca" "ca"
 
