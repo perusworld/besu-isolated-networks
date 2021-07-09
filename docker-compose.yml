@@ -16,13 +16,13 @@ services:
         --p2p-host=$$(hostname -i) \
         --genesis-file=/config/genesis.json \
         --node-private-key-file=/opt/besu/keys/key \
-        --p2p-ssl-enabled \
-        --p2p-ssl-keystore-type=JKS \
-        --p2p-ssl-keystore-file=/opt/besu/p2p-ssl/keystore.jks \
-        --p2p-ssl-keystore-password-file=/opt/besu/p2p-ssl/nsspin.txt \
-        --p2p-ssl-truststore-type=JKS \
-        --p2p-ssl-truststore-file=/opt/besu/p2p-ssl/truststore.jks \
-        --p2p-ssl-truststore-password-file=/opt/besu/p2p-ssl/nsspin.txt \
+        --p2p-tls-enabled \
+        --p2p-tls-keystore-type=JKS \
+        --p2p-tls-keystore-file=/opt/besu/p2p-tls/keystore.jks \
+        --p2p-tls-keystore-password-file=/opt/besu/p2p-tls/nsspin.txt \
+        --p2p-tls-truststore-type=JKS \
+        --p2p-tls-truststore-file=/opt/besu/p2p-tls/truststore.jks \
+        --p2p-tls-truststore-password-file=/opt/besu/p2p-tls/nsspin.txt \
         --rpc-http-api=EEA,WEB3,ETH,NET,PRIV,PERM,IBFT \
         --rpc-ws-api=EEA,WEB3,ETH,NET,PRIV,PERM,IBFT ;
     volumes:
@@ -32,7 +32,7 @@ services:
       - ./logs/besu:/tmp/besu
       - ./config/besu/ibft2Genesis.json:/config/genesis.json
       - ./config/besu/networkFiles/validator1/keys:/opt/besu/keys
-      - ./config/besu/p2p-ssl/validator1:/opt/besu/p2p-ssl
+      - ./config/besu/p2p-tls/validator1:/opt/besu/p2p-tls
       - ./config/besu/static-nodes.json:/config/static-nodes.json
   validator2:
     restart: "on-failure"
@@ -48,13 +48,13 @@ services:
         --p2p-host=$$(hostname -i) \
         --genesis-file=/config/genesis.json \
         --node-private-key-file=/opt/besu/keys/key \
-        --p2p-ssl-enabled \
-        --p2p-ssl-keystore-type=JKS \
-        --p2p-ssl-keystore-file=/opt/besu/p2p-ssl/keystore.jks \
-        --p2p-ssl-keystore-password-file=/opt/besu/p2p-ssl/nsspin.txt \
-        --p2p-ssl-truststore-type=JKS \
-        --p2p-ssl-truststore-file=/opt/besu/p2p-ssl/truststore.jks \
-        --p2p-ssl-truststore-password-file=/opt/besu/p2p-ssl/nsspin.txt \
+        --p2p-tls-enabled \
+        --p2p-tls-keystore-type=JKS \
+        --p2p-tls-keystore-file=/opt/besu/p2p-tls/keystore.jks \
+        --p2p-tls-keystore-password-file=/opt/besu/p2p-tls/nsspin.txt \
+        --p2p-tls-truststore-type=JKS \
+        --p2p-tls-truststore-file=/opt/besu/p2p-tls/truststore.jks \
+        --p2p-tls-truststore-password-file=/opt/besu/p2p-tls/nsspin.txt \
         --rpc-http-api=EEA,WEB3,ETH,NET,PRIV,PERM,IBFT \
         --rpc-ws-api=EEA,WEB3,ETH,NET,PRIV,PERM,IBFT ;
     volumes:
@@ -64,7 +64,7 @@ services:
       - ./logs/besu:/tmp/besu
       - ./config/besu/ibft2Genesis.json:/config/genesis.json
       - ./config/besu/networkFiles/validator2/keys:/opt/besu/keys
-      - ./config/besu/p2p-ssl/validator2:/opt/besu/p2p-ssl
+      - ./config/besu/p2p-tls/validator2:/opt/besu/p2p-tls
       - ./config/besu/static-nodes.json:/config/static-nodes.json
     depends_on:
       - validator1
@@ -82,13 +82,13 @@ services:
         --p2p-host=$$(hostname -i) \
         --genesis-file=/config/genesis.json \
         --node-private-key-file=/opt/besu/keys/key \
-        --p2p-ssl-enabled \
-        --p2p-ssl-keystore-type=JKS \
-        --p2p-ssl-keystore-file=/opt/besu/p2p-ssl/keystore.jks \
-        --p2p-ssl-keystore-password-file=/opt/besu/p2p-ssl/nsspin.txt \
-        --p2p-ssl-truststore-type=JKS \
-        --p2p-ssl-truststore-file=/opt/besu/p2p-ssl/truststore.jks \
-        --p2p-ssl-truststore-password-file=/opt/besu/p2p-ssl/nsspin.txt \
+        --p2p-tls-enabled \
+        --p2p-tls-keystore-type=JKS \
+        --p2p-tls-keystore-file=/opt/besu/p2p-tls/keystore.jks \
+        --p2p-tls-keystore-password-file=/opt/besu/p2p-tls/nsspin.txt \
+        --p2p-tls-truststore-type=JKS \
+        --p2p-tls-truststore-file=/opt/besu/p2p-tls/truststore.jks \
+        --p2p-tls-truststore-password-file=/opt/besu/p2p-tls/nsspin.txt \
         --rpc-http-api=EEA,WEB3,ETH,NET,PRIV,PERM,IBFT \
         --rpc-ws-api=EEA,WEB3,ETH,NET,PRIV,PERM,IBFT ;
     volumes:
@@ -98,7 +98,7 @@ services:
       - ./logs/besu:/tmp/besu
       - ./config/besu/ibft2Genesis.json:/config/genesis.json
       - ./config/besu/networkFiles/validator3/keys:/opt/besu/keys
-      - ./config/besu/p2p-ssl/validator3:/opt/besu/p2p-ssl
+      - ./config/besu/p2p-tls/validator3:/opt/besu/p2p-tls
       - ./config/besu/static-nodes.json:/config/static-nodes.json
     depends_on:
       - validator1
@@ -116,13 +116,13 @@ services:
         --p2p-host=$$(hostname -i) \
         --genesis-file=/config/genesis.json \
         --node-private-key-file=/opt/besu/keys/key \
-        --p2p-ssl-enabled \
-        --p2p-ssl-keystore-type=JKS \
-        --p2p-ssl-keystore-file=/opt/besu/p2p-ssl/keystore.jks \
-        --p2p-ssl-keystore-password-file=/opt/besu/p2p-ssl/nsspin.txt \
-        --p2p-ssl-truststore-type=JKS \
-        --p2p-ssl-truststore-file=/opt/besu/p2p-ssl/truststore.jks \
-        --p2p-ssl-truststore-password-file=/opt/besu/p2p-ssl/nsspin.txt \
+        --p2p-tls-enabled \
+        --p2p-tls-keystore-type=JKS \
+        --p2p-tls-keystore-file=/opt/besu/p2p-tls/keystore.jks \
+        --p2p-tls-keystore-password-file=/opt/besu/p2p-tls/nsspin.txt \
+        --p2p-tls-truststore-type=JKS \
+        --p2p-tls-truststore-file=/opt/besu/p2p-tls/truststore.jks \
+        --p2p-tls-truststore-password-file=/opt/besu/p2p-tls/nsspin.txt \
         --rpc-http-api=EEA,WEB3,ETH,NET,PRIV,PERM,IBFT \
         --rpc-ws-api=EEA,WEB3,ETH,NET,PRIV,PERM,IBFT ;
     volumes:
@@ -132,7 +132,7 @@ services:
       - ./logs/besu:/tmp/besu
       - ./config/besu/ibft2Genesis.json:/config/genesis.json
       - ./config/besu/networkFiles/validator4/keys:/opt/besu/keys
-      - ./config/besu/p2p-ssl/validator4:/opt/besu/p2p-ssl
+      - ./config/besu/p2p-tls/validator4:/opt/besu/p2p-tls
       - ./config/besu/static-nodes.json:/config/static-nodes.json
     depends_on:
       - validator1
@@ -150,13 +150,13 @@ services:
         --p2p-host=$$(hostname -i) \
         --genesis-file=/config/genesis.json \
         --node-private-key-file=/opt/besu/keys/key \
-        --p2p-ssl-enabled \
-        --p2p-ssl-keystore-type=JKS \
-        --p2p-ssl-keystore-file=/opt/besu/p2p-ssl/keystore.jks \
-        --p2p-ssl-keystore-password-file=/opt/besu/p2p-ssl/nsspin.txt \
-        --p2p-ssl-truststore-type=JKS \
-        --p2p-ssl-truststore-file=/opt/besu/p2p-ssl/truststore.jks \
-        --p2p-ssl-truststore-password-file=/opt/besu/p2p-ssl/nsspin.txt \
+        --p2p-tls-enabled \
+        --p2p-tls-keystore-type=JKS \
+        --p2p-tls-keystore-file=/opt/besu/p2p-tls/keystore.jks \
+        --p2p-tls-keystore-password-file=/opt/besu/p2p-tls/nsspin.txt \
+        --p2p-tls-truststore-type=JKS \
+        --p2p-tls-truststore-file=/opt/besu/p2p-tls/truststore.jks \
+        --p2p-tls-truststore-password-file=/opt/besu/p2p-tls/nsspin.txt \
         --rpc-http-api=EEA,WEB3,ETH,NET,PRIV,PERM,IBFT \
         --rpc-ws-api=EEA,WEB3,ETH,NET,PRIV,PERM,IBFT ;
     volumes:
@@ -166,7 +166,7 @@ services:
       - ./logs/besu:/tmp/besu
       - ./config/besu/ibft2Genesis.json:/config/genesis.json
       - ./config/besu/networkFiles/rpcnode/keys:/opt/besu/keys
-      - ./config/besu/p2p-ssl/rpcnode:/opt/besu/p2p-ssl
+      - ./config/besu/p2p-tls/rpcnode:/opt/besu/p2p-tls
       - ./config/besu/static-nodes.json:/config/static-nodes.json
     depends_on:
       - validator1
@@ -192,13 +192,13 @@ services:
         --privacy-onchain-groups-enabled=false \
         --privacy-public-key-file=/config/tessera/tessera.pub \
         --privacy-url=http://member1tessera:9101 \
-        --p2p-ssl-enabled \
-        --p2p-ssl-keystore-type=JKS \
-        --p2p-ssl-keystore-file=/opt/besu/p2p-ssl/keystore.jks \
-        --p2p-ssl-keystore-password-file=/opt/besu/p2p-ssl/nsspin.txt \
-        --p2p-ssl-truststore-type=JKS \
-        --p2p-ssl-truststore-file=/opt/besu/p2p-ssl/truststore.jks \
-        --p2p-ssl-truststore-password-file=/opt/besu/p2p-ssl/nsspin.txt \
+        --p2p-tls-enabled \
+        --p2p-tls-keystore-type=JKS \
+        --p2p-tls-keystore-file=/opt/besu/p2p-tls/keystore.jks \
+        --p2p-tls-keystore-password-file=/opt/besu/p2p-tls/nsspin.txt \
+        --p2p-tls-truststore-type=JKS \
+        --p2p-tls-truststore-file=/opt/besu/p2p-tls/truststore.jks \
+        --p2p-tls-truststore-password-file=/opt/besu/p2p-tls/nsspin.txt \
         --rpc-http-api=EEA,WEB3,ETH,NET,PRIV,PERM,IBFT \
         --rpc-ws-api=EEA,WEB3,ETH,NET,PRIV,PERM,IBFT ;
     volumes:
@@ -209,7 +209,7 @@ services:
       - ./config/besu/ibft2Genesis.json:/config/genesis.json
       - ./config/besu/networkFiles/member1/keys:/opt/besu/keys
       - ./config/tessera/networkFiles/tessera1/nodeKey.pub:/config/tessera/tessera.pub
-      - ./config/besu/p2p-ssl/member1besu:/opt/besu/p2p-ssl
+      - ./config/besu/p2p-tls/member1besu:/opt/besu/p2p-tls
       - ./config/besu/static-nodes.json:/config/static-nodes.json
     depends_on:
       - member1tessera
@@ -315,13 +315,13 @@ services:
         --privacy-onchain-groups-enabled=false \
         --privacy-public-key-file=/config/tessera/tessera.pub \
         --privacy-url=http://member2tessera:9101 \
-        --p2p-ssl-enabled \
-        --p2p-ssl-keystore-type=JKS \
-        --p2p-ssl-keystore-file=/opt/besu/p2p-ssl/keystore.jks \
-        --p2p-ssl-keystore-password-file=/opt/besu/p2p-ssl/nsspin.txt \
-        --p2p-ssl-truststore-type=JKS \
-        --p2p-ssl-truststore-file=/opt/besu/p2p-ssl/truststore.jks \
-        --p2p-ssl-truststore-password-file=/opt/besu/p2p-ssl/nsspin.txt \
+        --p2p-tls-enabled \
+        --p2p-tls-keystore-type=JKS \
+        --p2p-tls-keystore-file=/opt/besu/p2p-tls/keystore.jks \
+        --p2p-tls-keystore-password-file=/opt/besu/p2p-tls/nsspin.txt \
+        --p2p-tls-truststore-type=JKS \
+        --p2p-tls-truststore-file=/opt/besu/p2p-tls/truststore.jks \
+        --p2p-tls-truststore-password-file=/opt/besu/p2p-tls/nsspin.txt \
         --rpc-http-api=EEA,WEB3,ETH,NET,PRIV,PERM,IBFT \
         --rpc-ws-api=EEA,WEB3,ETH,NET,PRIV,PERM,IBFT ;
     volumes:
@@ -332,7 +332,7 @@ services:
       - ./config/besu/ibft2Genesis.json:/config/genesis.json
       - ./config/besu/networkFiles/member2/keys:/opt/besu/keys
       - ./config/tessera/networkFiles/tessera2/nodeKey.pub:/config/tessera/tessera.pub
-      - ./config/besu/p2p-ssl/member2besu:/opt/besu/p2p-ssl
+      - ./config/besu/p2p-tls/member2besu:/opt/besu/p2p-tls
       - ./config/besu/static-nodes.json:/config/static-nodes.json
     depends_on:
       - member2tessera
@@ -438,13 +438,13 @@ services:
         --privacy-onchain-groups-enabled=false \
         --privacy-public-key-file=/config/tessera/tessera.pub \
         --privacy-url=http://member3tessera:9101 \
-        --p2p-ssl-enabled \
-        --p2p-ssl-keystore-type=JKS \
-        --p2p-ssl-keystore-file=/opt/besu/p2p-ssl/keystore.jks \
-        --p2p-ssl-keystore-password-file=/opt/besu/p2p-ssl/nsspin.txt \
-        --p2p-ssl-truststore-type=JKS \
-        --p2p-ssl-truststore-file=/opt/besu/p2p-ssl/truststore.jks \
-        --p2p-ssl-truststore-password-file=/opt/besu/p2p-ssl/nsspin.txt \
+        --p2p-tls-enabled \
+        --p2p-tls-keystore-type=JKS \
+        --p2p-tls-keystore-file=/opt/besu/p2p-tls/keystore.jks \
+        --p2p-tls-keystore-password-file=/opt/besu/p2p-tls/nsspin.txt \
+        --p2p-tls-truststore-type=JKS \
+        --p2p-tls-truststore-file=/opt/besu/p2p-tls/truststore.jks \
+        --p2p-tls-truststore-password-file=/opt/besu/p2p-tls/nsspin.txt \
         --rpc-http-api=EEA,WEB3,ETH,NET,PRIV,PERM,IBFT \
         --rpc-ws-api=EEA,WEB3,ETH,NET,PRIV,PERM,IBFT ;
     volumes:
@@ -455,7 +455,7 @@ services:
       - ./config/besu/ibft2Genesis.json:/config/genesis.json
       - ./config/besu/networkFiles/member3/keys:/opt/besu/keys
       - ./config/tessera/networkFiles/tessera3/nodeKey.pub:/config/tessera/tessera.pub
-      - ./config/besu/p2p-ssl/member3besu:/opt/besu/p2p-ssl
+      - ./config/besu/p2p-tls/member3besu:/opt/besu/p2p-tls
       - ./config/besu/static-nodes.json:/config/static-nodes.json
     depends_on:
       - member3tessera

@@ -19,8 +19,8 @@ services:
     image: haproxy:${HAPROXY_VERSION:-latest}
     volumes:
       - ./config/haproxy/haproxy-partnera.cfg:/usr/local/etc/haproxy/haproxy.cfg
-      - ./config/besu/p2p-ssl/partnera-firewall/ssl.pem:/etc/ssl/certs/ssl.pem
-      - ./config/besu/p2p-ssl/partnera-firewall/ssl-ca.pem:/etc/ssl/certs/ssl-ca.pem
+      - ./config/besu/p2p-tls/partnera-firewall/ssl.pem:/etc/ssl/certs/ssl.pem
+      - ./config/besu/p2p-tls/partnera-firewall/ssl-ca.pem:/etc/ssl/certs/ssl-ca.pem
     ports:
       - 12037:12037
       - 20000:20000
@@ -32,8 +32,8 @@ services:
     image: haproxy:${HAPROXY_VERSION:-latest}
     volumes:
       - ./config/haproxy/haproxy-partnerb.cfg:/usr/local/etc/haproxy/haproxy.cfg
-      - ./config/besu/p2p-ssl/partnerb-firewall/ssl.pem:/etc/ssl/certs/ssl.pem
-      - ./config/besu/p2p-ssl/partnerb-firewall/ssl-ca.pem:/etc/ssl/certs/ssl-ca.pem
+      - ./config/besu/p2p-tls/partnerb-firewall/ssl.pem:/etc/ssl/certs/ssl.pem
+      - ./config/besu/p2p-tls/partnerb-firewall/ssl-ca.pem:/etc/ssl/certs/ssl-ca.pem
     ports:
       - 12038:12038
       - 20003:20000
@@ -45,8 +45,8 @@ services:
     image: haproxy:${HAPROXY_VERSION:-latest}
     volumes:
       - ./config/haproxy/haproxy-partnerc.cfg:/usr/local/etc/haproxy/haproxy.cfg
-      - ./config/besu/p2p-ssl/partnerc-firewall/ssl.pem:/etc/ssl/certs/ssl.pem
-      - ./config/besu/p2p-ssl/partnerc-firewall/ssl-ca.pem:/etc/ssl/certs/ssl-ca.pem
+      - ./config/besu/p2p-tls/partnerc-firewall/ssl.pem:/etc/ssl/certs/ssl.pem
+      - ./config/besu/p2p-tls/partnerc-firewall/ssl-ca.pem:/etc/ssl/certs/ssl-ca.pem
     ports:
       - 12039:12039
       - 20006:20000

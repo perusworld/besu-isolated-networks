@@ -3,7 +3,7 @@
 ## Network Topology
 ![Network Topology](/network-topology.png)
 
-## To build. Checkout and build [p2p-over-ssl branch](https://github.com/perusworld/besu/tree/p2p-over-ssl) docker images
+## To build. Checkout and build [p2p-tls-at-cli branch](https://github.com/perusworld/besu/tree/p2p-tls-at-cli) docker images
 ```bash
 ./gradlew clean spotlessApply build -x test -x acceptanceTest distDocker
 ```
@@ -15,7 +15,9 @@
 ```bash
 cd smart_contracts
 npm install
-node scripts/deploy.js
+node scripts/eth_tx.js
+node scripts/private_tx.js
+node scripts/public_tx.js
 ```
 
 ## Key Configs
