@@ -3,7 +3,7 @@
 ## Network Topology
 ![Network Topology](/network-topology.png)
 
-## To build. Checkout and build [p2p-tls-at-cli branch](https://github.com/perusworld/besu/tree/p2p-tls-at-cli) docker images
+## To build. Checkout and build [p2p-tls-cli-at-fn branch](https://github.com/perusworld/besu/tree/p2p-tls-cli-at-fn) docker images
 ```bash
 ./gradlew clean spotlessApply build -x test -x acceptanceTest distDocker
 ```
